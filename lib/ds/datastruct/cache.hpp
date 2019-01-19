@@ -27,7 +27,7 @@ public:
     using map_t = std::unordered_map<Key, list_iterator, Hash, Eq>;
     using map_value_t = typename map_t::value_type;
 
-private:
+protected:
     list_t elems_;
     map_t map_to_els_;
 
