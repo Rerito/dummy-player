@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "datastruct/cache.hpp"
-#include "utils/make_iterator_vector.hpp"
+#include "utils/make_ref_wrapper_vector.hpp"
 
 #include <optional>
 
@@ -19,34 +19,52 @@ template <typename TrackKey,
           typename Hash = std::hash<TrackKey>,
           typename Eq = std::equal_to<TrackKey> >
 class music_cache : private cache<TrackKey, Track, Hash, Eq>, private ShufflePolicy {
+
+    friend class access;
+
+public:
     using base_type = cache<TrackKey, Track, Hash, Eq>;
-    using playlist_type = std::vector<typename base_type::list_iterator>;
+    using playlist_type = std::vector<std::reference_wrapper<Track> >;
     using playlist_iterator = typename playlist_type::iterator;
+    using track_type = Track;
+private:
     playlist_type playlist_;
 
     playlist_iterator current_track_it_;
-    typename base_type::list_iterator current_track_;
+    std::optional<std::reference_wrapper<Track> > current_track_;
 
     // When a playlist reordering occurs, we must update the playlist iterator
     // so that it points to the correct track...
     // `current_track_` is never invalidated unless it is removed from the
     // playlist.
     void refresh_current_track() {
-        current_track_it_ = find(begin(playlist_), end(playlist_), current_track_);
+        if (current_track_) {
+            current_track_it_ = std::find_if(begin(playlist_), end(playlist_), [&](auto const& tr) { return &(current_track_->get()) == &(tr.get()); });
+        } else {
+            current_track_it_ = end(playlist_);
+        }
     }
 
 public:
-    
-    std::optional<std::reference_wrapper<Track> > next() {
-        return {};
-    }
-
+    // We will try to have a very minimalistic approach with regard to the
+    // features we embed into the music_cache...
+    // This will allow for better encapsulation and modularity
     void reorder(random_shuffle_tag) {
-        ShufflePolicy::shuffle(playlist_);
+        using std::begin;
+        using std::end;
+        ShufflePolicy::shuffle(begin(playlist_), end(playlist_));
     }
 
     void reorder(native_order_tag) {
-        playlist_ = make_iterator_vector(base_type::elems_); 
+        playlist_ = make_ref_wrapper_vector(base_type::elems_); 
+    }
+
+    std::optional<std::reference_wrapper<Track const> > get_current_track() const {
+        if (current_track_) {
+            return std::cref(current_track_->get());
+        } else {
+            return {};
+        }
     }
 };
 

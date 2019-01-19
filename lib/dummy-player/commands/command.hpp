@@ -36,6 +36,9 @@ auto apply(FTor f, std::vector<std::string> const& args, ArgsList arg_list) {
 template <typename Sig, Sig *Fn>
 class command;
 
+// This abstraction layer allows us to offer the same interface facade
+// For every user command (text-driven).
+// Then, using some TMP we are able to dispatch arguments accordingly...
 template <typename Ret, typename... Args, Ret(*Fn)(Args...)>
 class command<Ret(Args...), Fn> {
     

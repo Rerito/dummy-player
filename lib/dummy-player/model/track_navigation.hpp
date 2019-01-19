@@ -3,9 +3,12 @@
 
 #include <array>
 #include <utility> // For index_sequence related things
+#include <optional>
+
 #include "meta/function.hpp"
 
 #include "repeat_mode.hpp"
+#include "access.hpp"
 
 namespace dp {
 
@@ -105,6 +108,19 @@ It get_prev_track(RepeatMode mode, It current_track, It first_track, It end_of_t
         throw std::invalid_argument("mode");
     }
     return prev_fns[static_cast<size_t>(mode)](current_track, first_track, end_of_tracks);
+}
+
+template <typename MusicCache>
+std::optional<typename MusicCache::playlist_type::value_type> next_track(RepeatMode mode, MusicCache& mcache) {
+    auto& pl = access::get_playlist(mcache);
+    auto cur_track_it = access::get_current_track(mcache);
+    auto nxt_it = get_next_track(mode, cur_track_it, begin(pl), end(pl));
+    access::set_current_track(mcache, nxt_it);
+    if (nxt_it == end(pl)) {
+        return {};
+    } else {
+        return *nxt_it;
+    }
 }
 
 } // namespace dp
