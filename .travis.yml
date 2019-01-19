@@ -1,0 +1,35 @@
+language: cpp
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-7
+      - valgrind
+
+
+matrix:
+  include:
+    - os: linux
+      sudo: required
+      env: CMAKE_GENERATOR="Unix Makefiles" BUILD_TYPE=Debug 
+      compiler: gcc
+    - os: linux
+      sudo: required
+      env: CMAKE_GENERATOR="Unix Makefiles" BUILD_TYPE=Release
+      compiler: gcc
+
+
+install:
+  - if [[ $TRAVIS_OS_NAME="linux" ]]; then
+      export CXX=g++-7;
+    fi
+
+script:
+  - cmake -H. -Bbuild
+          -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+          -G "${CMAKE_GENERATOR}"
+          -DSANITIZE=${SANITIZE}
+  - cmake --build build --config ${BUILD_TYPE} -- -j2
+  - cd build && ctest
