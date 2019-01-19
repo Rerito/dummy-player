@@ -12,9 +12,18 @@
 
 namespace detail {
 
-template <typename FTor, typename... Args, size_t... Is>
-auto apply(FTor f, std::vector<std::string> const& args, meta::type_list<Args...>, std::index_sequence<Is...>) {
-    return f(type_conversion<nth_element<Is, Args...> >::from_string(args.at(Is))...);
+template <typename FTor, typename Ret, typename... Args, size_t... Is>
+auto apply(FTor f, std::vector<std::string> const& args, meta::type_list<Ret, Args...>, std::index_sequence<Is...>) 
+    -> std::enable_if_t<!std::is_void<Ret>::value, std::string> {
+    using std::to_string;
+    return to_string(f(from_string<nth_element<Is, Args...> >{}(args.at(Is))...));
+}
+
+template <typename FTor, typename Ret, typename... Args, size_t... Is>
+auto apply(FTor f, std::vector<std::string> const& args, meta::type_list<Ret, Args...>, std::index_sequence<Is...>) 
+    -> std::enable_if_t<std::is_void<Ret>::value, std::string> {
+    f(from_string<nth_element<Is, Args...> >{}(args.at(Is))...);
+    return {};
 }
 
 } // namespace detail
@@ -32,7 +41,7 @@ class command<Ret(Args...), Fn> {
     
 public:
     auto operator()(std::vector<std::string> const& args) const {
-        return apply<sizeof... (Args)>(Fn, args, meta::type_list<Args...>{});
+        return apply<sizeof... (Args)>(Fn, args, meta::type_list<Ret, Args...>{});
     }
 };
 

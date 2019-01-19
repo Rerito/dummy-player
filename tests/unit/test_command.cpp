@@ -13,5 +13,5 @@ struct CommandTest : testing::Test {
 
 TEST_F(CommandTest, RunCommand) {
     auto s = command<decltype(sum), &sum>{}({"12", "25"});
-    ASSERT_EQ(s, 37) << "expected sum(12,25) to be 37 but was " << s << " instead.";
+    ASSERT_EQ(s, "37") << "expected sum(12,25) to be 37 but was " << s << " instead.";
 }
