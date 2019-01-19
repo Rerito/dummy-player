@@ -5,6 +5,8 @@
 #include "datastruct/cache.hpp"
 #include "utils/make_iterator_vector.hpp"
 
+#include <optional>
+
 namespace dp {
 
 struct random_shuffle_tag {};
@@ -35,6 +37,10 @@ class music_cache : private cache<TrackKey, Track, Hash, Eq>, private ShufflePol
 
 public:
     
+    std::optional<std::reference_wrapper<Track> > next() {
+        return {};
+    }
+
     void reorder(random_shuffle_tag) {
         ShufflePolicy::shuffle(playlist_);
     }
