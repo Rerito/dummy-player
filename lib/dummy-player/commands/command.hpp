@@ -5,10 +5,12 @@
 #include <vector>
 #include <string>
 
+#include "utils/forward_macro.hpp"
 #include "type_conversion.hpp"
 #include "meta/type_list.hpp"
 #include "meta/nth_element.hpp"
 
+namespace dp {
 
 namespace detail {
 
@@ -33,18 +35,28 @@ auto apply(FTor f, std::vector<std::string> const& args, ArgsList arg_list) {
     return detail::apply(f, args, arg_list, std::make_index_sequence<N>{});
 }
 
-template <typename Sig, Sig *Fn>
+template <typename Sig>
 class command;
 
 // This abstraction layer allows us to offer the same interface facade
 // For every user command (text-driven).
 // Then, using some TMP we are able to dispatch arguments accordingly...
-template <typename Ret, typename... Args, Ret(*Fn)(Args...)>
-class command<Ret(Args...), Fn> {
-    
+template <typename Ret, typename... Args>
+class command<Ret(Args...)> {
+    std::function<Ret(Args...)> fn_;
 public:
+    template <typename... FnArgs>
+    command(FnArgs&&... args) : fn_(CPPFWD(args)...) {}
+
+    command(command&&) = default;
+    command(command const&) = default;
+
+    command& operator=(command const&) = default;
+    command& operator=(command&&) = default;
+
     auto operator()(std::vector<std::string> const& args) const {
-        return apply<sizeof... (Args)>(Fn, args, meta::type_list<Ret, Args...>{});
+        return apply<sizeof... (Args)>(fn_, args, meta::type_list<Ret, Args...>{});
     }
 };
 
+} // namespace dp
