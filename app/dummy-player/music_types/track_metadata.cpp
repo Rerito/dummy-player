@@ -1,6 +1,5 @@
 
 #include "track_metadata.hpp"
-#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <string_view>
@@ -19,9 +18,9 @@ static std::pair<std::string, std::string> parse_kv_line(std::string const& line
     return std::pair<std::string, std::string>(std::string_view(data(line), pos), std::string_view(data(line) + pos, size(line) - pos - 1));
 }
 
-static std::unordered_map<std::string, std::string> parse_kv_file(std::filesystem::path const& path) {
+static std::unordered_map<std::string, std::string> parse_kv_file(std::string const& path) {
     std::unordered_map<std::string, std::string> kv_map;
-    std::ifstream ifile(path.native());
+    std::ifstream ifile(path);
     std::string line;
     while (std::getline(ifile, line)) {
         try {
@@ -43,11 +42,7 @@ static std::unordered_map<std::string, std::string> parse_kv_file(std::filesyste
 //
 // Any additionnal (key, value) pair will be registered in the attribute map of
 // the track_metadata structure.
-track_metadata  read_track_metadata(std::filesystem::path const& path) {
-    if (!std::filesystem::is_regular_file(path)) {
-        throw std::invalid_argument("path: expected path to a file");
-    }
-    
+track_metadata  read_track_metadata(std::string const& path) {
     auto kv_map = parse_kv_file(path);
 
     track_metadata md { kv_map["artist"], kv_map["title"], parse_duration(kv_map["duration"])  };

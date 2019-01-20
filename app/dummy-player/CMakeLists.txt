@@ -15,7 +15,6 @@ target_include_directories(dummy-player PRIVATE ${CMAKE_SOURCE_DIR}/app/dummy-pl
 
 target_link_libraries(
     dummy-player
-    stdc++fs
     Threads::Threads
     data_struct
     dummyplayer_lib
