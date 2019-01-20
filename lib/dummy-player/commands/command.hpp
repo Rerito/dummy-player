@@ -56,6 +56,9 @@ public:
     command& operator=(command&&) = default;
 
     std::string operator()(std::vector<std::string> const& args) const {
+        if (sizeof...(Args) < size(args)) {
+            throw std::runtime_error("Too many arguments for command.");
+        }
         return apply<sizeof... (Args)>(fn_, args, meta::type_list<Ret, Args...>{});
     }
 };

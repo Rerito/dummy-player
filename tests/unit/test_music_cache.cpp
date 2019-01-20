@@ -31,6 +31,13 @@ TEST_F(MusicCacheTest, SetTrack) {
     ASSERT_EQ(cur_track->get(), std::string("Hold the line"));
 }
 
+TEST_F(MusicCacheTest, EmptyNextTrack) {
+    music_cache_t empty_mcache;;
+    dp::next_track(dp::RepeatMode::NO_REPEAT, empty_mcache);
+    auto cur_track = empty_mcache.get_current_track();
+    ASSERT_FALSE(cur_track);
+}
+
 TEST_F(MusicCacheTest, NextTrack) {
     dp::set_track(mcache_, 1);
     dp::next_track(dp::RepeatMode::NO_REPEAT, mcache_);

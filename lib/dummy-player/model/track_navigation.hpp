@@ -56,8 +56,11 @@ struct track_navigation_fns<RepeatMode::REPEAT_ALL> {
 template <>
 struct track_navigation_fns<RepeatMode::NO_REPEAT> {
     template <typename It>
-    static It get_next_track(It cur, It, It) {
-        return ++cur;
+    static It get_next_track(It cur, It, It end) {
+        if (cur != end) {
+          ++cur;
+        }
+        return cur;
     }
 
     template <typename It>

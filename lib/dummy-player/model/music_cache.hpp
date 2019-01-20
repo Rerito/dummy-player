@@ -46,6 +46,7 @@ private:
     }
 
 public:
+    music_cache() : playlist_(), current_track_it_(end(playlist_)), current_track_() {}
     // We will try to have a very minimalistic approach with regard to the
     // features we embed into the music_cache...
     // This will allow for better encapsulation and modularity
