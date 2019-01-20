@@ -2,6 +2,7 @@
 #include <thread>
 #include <sstream>
 #include "threads/threads.hpp"
+#include "thread/safe_thread.hpp"
 
 using namespace std::chrono_literals;
 
@@ -13,14 +14,15 @@ int main() {
     ui_shared_state ui_state;
     player_shared_state player_state;
     shared_music_store mstore;
+    shared_state<std::exception_ptr> status_eptr;
 
     std::thread ui_thread([&]() {
         user_input_main(cmd_queue, ui_state);
     });
 
-    std::thread status_thread([&]() {
+    safe_thread<> status_thread([&]() {
         ui_status_main(msg_queue, ui_state);
-    });
+    }, status_eptr);
 
     ui_thread.join();
     status_thread.join();

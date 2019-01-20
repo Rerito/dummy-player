@@ -8,10 +8,11 @@
 
 #include "shared_state.hpp"
 
-struct safe_thread : public std::thread {
+template <typename Thread = std::thread>
+struct safe_thread : public Thread {
     template <typename F>
     safe_thread(F&& ftor, shared_state<std::exception_ptr>& eptr) :
-        std::thread([&]() {
+        Thread([&]() {
             try {
                 ftor();
             } catch (...) {
