@@ -24,7 +24,6 @@ struct MusicCacheTest : testing::Test {
 };
 
 TEST_F(MusicCacheTest, SetTrack) {
-    ASSERT_EQ(dp::access::get_playlist(mcache_).size(), 3u);
     dp::set_track(mcache_, 0);
     auto cur_track = mcache_.get_current_track();
     ASSERT_TRUE(cur_track) << "Expected current track to be set";

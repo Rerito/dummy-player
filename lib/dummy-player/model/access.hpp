@@ -13,10 +13,10 @@ class access {
 
     // Friend services...
     template <typename MusicCache>
-    friend std::optional<typename MusicCache::playlist_iterator::value_type> next_track(RepeatMode, MusicCache&);
+    friend std::optional<typename MusicCache::playlist_type::value_type> next_track(RepeatMode, MusicCache&);
 
     template <typename MusicCache>
-    friend std::optional<typename MusicCache::playlist_iterator::value_type> previous_track(RepeatMode, MusicCache&);
+    friend std::optional<typename MusicCache::playlist_type::value_type> previous_track(RepeatMode, MusicCache&);
 
     template <typename MusicCache>
     friend void shuffle_playlist(MusicCache&);
@@ -27,10 +27,9 @@ class access {
     template <typename MusicCache, typename TrackKey>
     friend void remove_track(MusicCache& music_cache, TrackKey const&);
 
-    // It appears the friend declarations above do not work for some reason
-    // beyond my understanding... So let's just make the access facilities
-    // public /)_-)
-public:
+    template <typename MusicCache, typename TrackKey>
+    friend void set_track(MusicCache&, TrackKey const&);
+
     template <typename MusicCache>
     static decltype(auto) get_playlist(MusicCache&& music_cache) {
         return (CPPFWD(music_cache).playlist_);
