@@ -4,6 +4,7 @@
 #include <chrono>
 #include <string>
 #include <filesystem>
+#include <unordered_map>
 
 struct track_metadata {
     std::string title_;
@@ -11,6 +12,8 @@ struct track_metadata {
 
     std::chrono::seconds duration_;
     std::filesystem::path fname_;
+
+    std::unordered_map<std::string, std::string> attr_;
 };
 
 // Extract metadata from an actual track file
