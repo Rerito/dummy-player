@@ -6,6 +6,7 @@ find_package(Threads REQUIRED)
 add_executable(
     dummy-player
     main.cpp
+    command_dispatcher.cpp
     music_types/track_metadata.cpp
     threads/status_thread.cpp
     threads/user_input_thread.cpp

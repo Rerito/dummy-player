@@ -19,5 +19,19 @@ struct from_string<int> {
     }
 };
 
+template <typename T>
+struct to_string_s {
+    template <typename U>
+    std::string operator()(U&& el) const {
+        using std::to_string;
+        return to_string(CPPFWD(el));
+    }
+};
 
-
+template <>
+struct to_string_s<std::string> {
+    template <typename T>
+    std::string operator()(T&& str) const {
+        return CPPFWD(str);
+    }
+};
