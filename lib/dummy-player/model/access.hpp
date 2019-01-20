@@ -25,7 +25,7 @@ class access {
     friend void add_track(MusicCache& music_cache, TrackKey const&, TrackArgs&&...);
 
     template <typename MusicCache, typename TrackKey>
-    friend void remove_track(MusicCache& music_cache, TrackKey const&);
+    friend std::optional<typename MusicCache::playlist_type::value_type> remove_track(MusicCache& music_cache, TrackKey const&, RepeatMode);
 
     template <typename MusicCache, typename TrackKey>
     friend void set_track(MusicCache&, TrackKey const&);
