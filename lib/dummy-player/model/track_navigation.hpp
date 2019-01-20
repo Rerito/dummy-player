@@ -123,5 +123,17 @@ std::optional<typename MusicCache::playlist_type::value_type> next_track(RepeatM
     }
 }
 
+template <typename MusicCache>
+std::optional<typename MusicCache::playlist_type::value_type> previous_track(RepeatMode mode, MusicCache& mcache) {
+    auto& pl = access::get_playlist(mcache);
+    auto cur_track_it = access::get_current_track(mcache);
+    auto prev_it = get_prev_track(mode, cur_track_it, begin(pl), end(pl));
+    access::set_current_track(mcache, prev_it);
+    if (prev_it == end(pl)) {
+        return {};
+    } else {
+        return *prev_it;
+    }
+}
 } // namespace dp
 

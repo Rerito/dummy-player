@@ -20,11 +20,15 @@ int main() {
         user_input_main(cmd_queue, ui_state);
     });
 
+    std::thread cmd_thread([&]() {
+        command_dispatcher_main(cmd_queue, msg_queue, mstore, player_state);
+    });
     safe_thread<> status_thread([&]() {
         ui_status_main(msg_queue, ui_state);
     }, status_eptr);
 
     ui_thread.join();
+    cmd_thread.join();
     status_thread.join();
 
     return 0;
