@@ -44,12 +44,32 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
         dp::remove_track(store_rw.get(), track_id, playerst_rw.get().repeat_mode_);
         return "rm_track ran successfully";
     });
+
+    auto repeat_mode_fn = dp::command<std::string(dp::RepeatMode)>([&](dp::RepeatMode mode) {
+        auto [playerst_rw, wlock] = player_state.get_payload();
+        playerst_rw.get().repeat_mode_ = mode;
+        return "repeat_mode ran successfully";
+    });
+
+    auto play_fn = dp::command<void()>([&]() {
+        auto [plr, wlock] = player_state.get_payload();
+        plr.get().status_ = player_status::PLAYING;
+    });
+
+    auto pause_fn = dp::command<void()>([&]() {
+        auto [plr, wlock] = player_state.get_payload();
+        plr.get().status_ = player_status::PLAYING;
+    });
+
     auto quit_fn = dp::command<void()>([]() { std::terminate(); });
 
     dispatcher.register_command("add_track", std::move(add_track_fn), "add_track <track_id> <track_file>: add the given file to the playlist");
     dispatcher.register_command("next_track", std::move(next_track_fn), "next_track: Skip to the next track. Stops playback if repeat is disabled and end of playlist is reached.");
     dispatcher.register_command("prev_track", std::move(prev_track_fn), "prev_track: Go to the previous track.");
     dispatcher.register_command("rm_track", std::move(rm_track_fn), "rm_track <track_id>: remove the given track file from the playlist");
+    dispatcher.register_command("repeat_mode", std::move(repeat_mode_fn), "repeat_mode <NONE|ONE|ALL>: set the repeat mode to the given setting");
+    dispatcher.register_command("play", std::move(play_fn), "play: start playing (if there is a track to read)");
+    dispatcher.register_command("pause", std::move(pause_fn), "pause: pauses the playback thread");
     dispatcher.register_command("quit", std::move(quit_fn), "quit: exit the program... Brutally! ;o");
     dispatcher.register_command("help", dp::command<std::string()>([&]() { return help_function(dispatcher); }), "help: print command descriptions");
 }

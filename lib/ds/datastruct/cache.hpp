@@ -38,7 +38,7 @@ public:
     auto& emplace(Key const& k, Args&&... args) {
         auto& it = map_to_els_[k];
         if (it != list_iterator {}) {
-            throw std::invalid_argument("k");
+            throw std::invalid_argument("invalid argument: k");
         }
         elems_.emplace_back(std::pair<Key, Value>(k, Value(CPPFWD(args)...)));
         it = --end(elems_);
@@ -66,7 +66,7 @@ public:
             elems_.erase(it->second);
             map_to_els_.erase(it);
         } else {
-            throw std::invalid_argument("k");
+            throw std::invalid_argument("invalid argument: k");
         }
     }
 };
