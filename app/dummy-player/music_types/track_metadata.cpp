@@ -15,7 +15,7 @@ static std::pair<std::string, std::string> parse_kv_line(std::string const& line
     if (std::string::npos == pos) {
         throw std::invalid_argument("line");
     }
-    return std::pair<std::string, std::string>(std::string_view(data(line), pos), std::string_view(data(line) + pos, size(line) - pos - 1));
+    return std::pair<std::string, std::string>(std::string_view(data(line), pos), std::string_view(data(line) + pos + 1, size(line) - pos - 1));
 }
 
 static std::unordered_map<std::string, std::string> parse_kv_file(std::string const& path) {
