@@ -1,3 +1,7 @@
+
+#include <sstream>
+#include <string>
+
 #include "threads/states.hpp"
 #include "commands/command_dispatcher.hpp"
 #include "commands/command.hpp"
@@ -6,9 +10,14 @@
 #include "model/remove_track.hpp"
 #include "model/track_navigation.hpp"
 
-dp::command_dispatcher make_command_dispatcher(shared_music_store& music_store, player_shared_state& player_state) {
-    dp::command_dispatcher dispatcher;
+static std::string help_function(dp::command_dispatcher const& dispatcher) {
+    std::stringstream sstr;
+    sstr << "Command usage:\n";
+    dispatcher.help(sstr);   
+    return sstr.str();
+}
 
+void make_command_dispatcher(shared_music_store& music_store, player_shared_state& player_state, dp::command_dispatcher& dispatcher) {
     auto add_track_fn = dp::command<std::string(std::string const&)>([&](std::string const& track_id) {
         auto [store_rw, lock] = music_store.get_payload();
         dp::add_track(store_rw.get(), track_id, read_track_metadata(track_id));
@@ -42,7 +51,7 @@ dp::command_dispatcher make_command_dispatcher(shared_music_store& music_store, 
     dispatcher.register_command("prev_track", prev_track_fn, "prev_track: Go to the previous track.");
     dispatcher.register_command("rm_track", rm_track_fn, "rm_track <track_file>: remove the given track file from the playlist");
     dispatcher.register_command("quit", quit_fn, "quit: exit the program... Brutally! ;o");
-    return dispatcher;
+    dispatcher.register_command("help", dp::command<std::string()>([&]() { return help_function(dispatcher); }), "help: print command descriptions");
 }
 
 

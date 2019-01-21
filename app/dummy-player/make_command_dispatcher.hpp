@@ -19,4 +19,4 @@
 //   - play
 //   - repeat <repeat_mode>
 //   - shuffle
-dp::command_dispatcher make_command_dispatcher(shared_music_store& music_store, player_shared_state& player_state); 
+void make_command_dispatcher(shared_music_store& music_store, player_shared_state& player_state, dp::command_dispatcher& dispatcher);

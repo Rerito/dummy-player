@@ -27,6 +27,14 @@ public:
     std::string run(std::string const& cmd, std::vector<std::string> const& args) const {
         return commands_.at(cmd).first(args);
     }
+
+    template <typename OStream>
+    void help(OStream& out) const {
+        for (auto const& cmd : commands_) {
+            out << cmd.second.second << "\n";
+        }
+    }
+
 private:
     std::unordered_map<std::string, command_bundle_type> commands_;
 };

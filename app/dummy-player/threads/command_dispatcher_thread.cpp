@@ -42,7 +42,8 @@ static void run_command(dp::command_dispatcher& dispatcher, shared_message_queue
 }
 
 void command_dispatcher_main(shared_command_queue& cmd_queue, shared_message_queue& msg_queue, shared_music_store& music_store, player_shared_state& player_state) {
-    auto dispatcher = make_command_dispatcher(music_store, player_state);
+    dp::command_dispatcher dispatcher;
+    make_command_dispatcher(music_store, player_state, dispatcher);
     while (true) {
         auto cmd = get_command(cmd_queue);
         run_command(dispatcher, msg_queue, cmd); 
