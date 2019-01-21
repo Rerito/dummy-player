@@ -46,11 +46,11 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
     });
     auto quit_fn = dp::command<void()>([]() { std::terminate(); });
 
-    dispatcher.register_command("add_track", add_track_fn, "add_track <track_file>: add the given file to the playlist");
-    dispatcher.register_command("next_track", next_track_fn, "next_track: Skip to the next track. Stops playback if repeat is disabled and end of playlist is reached.");
-    dispatcher.register_command("prev_track", prev_track_fn, "prev_track: Go to the previous track.");
-    dispatcher.register_command("rm_track", rm_track_fn, "rm_track <track_file>: remove the given track file from the playlist");
-    dispatcher.register_command("quit", quit_fn, "quit: exit the program... Brutally! ;o");
+    dispatcher.register_command("add_track", std::move(add_track_fn), "add_track <track_file>: add the given file to the playlist");
+    dispatcher.register_command("next_track", std::move(next_track_fn), "next_track: Skip to the next track. Stops playback if repeat is disabled and end of playlist is reached.");
+    dispatcher.register_command("prev_track", std::move(prev_track_fn), "prev_track: Go to the previous track.");
+    dispatcher.register_command("rm_track", std::move(rm_track_fn), "rm_track <track_file>: remove the given track file from the playlist");
+    dispatcher.register_command("quit", std::move(quit_fn), "quit: exit the program... Brutally! ;o");
     dispatcher.register_command("help", dp::command<std::string()>([&]() { return help_function(dispatcher); }), "help: print command descriptions");
 }
 
