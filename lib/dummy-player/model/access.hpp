@@ -41,6 +41,15 @@ class access {
     }
 
     template <typename MusicCache>
+    static auto& get_playlist_index(MusicCache& mcache) {
+        return mcache.playlist_idx_;
+    }
+
+    template <typename MusicCache>
+    static auto const& get_playlist_index(MusicCache const& mcache) {
+        return mcache.playlist_idx_;
+    }
+    template <typename MusicCache>
     static typename MusicCache::base_type& get_base_cache(MusicCache& music_cache) {
         return music_cache;
     }

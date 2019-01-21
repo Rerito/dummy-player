@@ -31,6 +31,8 @@ std::optional<typename MusicCache::playlist_type::value_type> remove_track(Music
             [&](auto const& rw) { return &(rw.get()) == &tgt_track; }
         )
     );
+    //... And from the index
+    dp::access::get_playlist_index(mcache).erase(&tgt_track);
 
     // Then by removing it from the raw storage cache:
     dp::access::get_base_cache(mcache).erase(track_id);

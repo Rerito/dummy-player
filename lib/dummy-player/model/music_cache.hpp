@@ -29,6 +29,7 @@ public:
     using track_type = Track;
 private:
     playlist_type playlist_;
+    std::unordered_map<Track*, TrackKey> playlist_idx_;
 
     playlist_iterator current_track_it_;
     std::optional<std::reference_wrapper<Track> > current_track_;
