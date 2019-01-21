@@ -27,6 +27,7 @@ public:
     using playlist_type = std::vector<std::reference_wrapper<Track> >;
     using playlist_iterator = typename playlist_type::iterator;
     using track_type = Track;
+    using track_id = TrackKey;
 private:
     playlist_type playlist_;
     std::unordered_map<Track*, TrackKey> playlist_idx_;
