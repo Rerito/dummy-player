@@ -61,8 +61,7 @@ static void commit_command(shared_command_queue& cmd_queue,
     }
 }
 
-void user_input_main(shared_command_queue& cmd_queue,
-                     ui_shared_state& /*ui_state*/) {
+void user_input_main(shared_command_queue& cmd_queue) {
     using namespace std::chrono_literals;
     // We will take care of termination handling later
     std:: cout << "> ";

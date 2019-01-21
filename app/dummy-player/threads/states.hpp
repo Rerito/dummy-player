@@ -23,5 +23,16 @@ inline void push_shared_queue(shared_state<Queue>& msg_queue, Args&&... args) {
     q_refwrap.get().emplace(CPPFWD(args)...);
 }
 
+template <typename Queue>
+inline std::optional<typename Queue::value_type> pop_shared_queue(shared_state<Queue>& queue) {
+    std::optional<typename Queue::value_type> item;
+    auto [q_refwrap, wlock] = queue.get_payload();
+    auto& q = q_refwrap.get();
+    if (!q.empty()) {
+        item = q.top();
+        q.pop();
+    }
+    return item;
+}
 
 

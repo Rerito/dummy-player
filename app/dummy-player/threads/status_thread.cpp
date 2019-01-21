@@ -9,34 +9,22 @@ using namespace std::chrono_literals;
 
 static auto get_message(shared_message_queue& msg_queue) {
     while (true) {
-        {
-            auto [qrw, lock] = msg_queue.get_payload();
-            auto& q = qrw.get();
-            if (!q.empty()) {
-                auto msg = q.top();
-                q.pop();
-                return msg;
-            }
-        } // lock is destroyed, freeing the queue
+        auto msg = pop_shared_queue(msg_queue);
+        if (msg) {
+           return std::move(*msg);
+        }
         std::this_thread::sleep_for(10ms);
     }
 }
 
-static void print_current_ui_state(ui_shared_state const& ui_state) {
-    auto [uist_rw, lock] = ui_state.get_payload();
-    std::cout << std::endl << "> " << uist_rw.get();
-}
-
-static void print_message(ui_shared_state const& ui_state, cmd::ui_message const& msg) {
+static void print_message(cmd::ui_message const& msg) {
     std::cout << "> " << msg.msg_ << "\n";
-    print_current_ui_state(ui_state);
 }
 
-void ui_status_main(shared_message_queue& msg_queue,
-                    ui_shared_state const& ui_state) {
+void ui_status_main(shared_message_queue& msg_queue) {
     while (true) {
         auto msg = get_message(msg_queue);
-        print_message(ui_state, msg);
+        print_message(msg);
         std::this_thread::sleep_for(10ms);
     } 
 }
