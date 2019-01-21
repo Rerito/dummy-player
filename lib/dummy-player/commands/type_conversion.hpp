@@ -19,6 +19,12 @@ struct from_string<int> {
     }
 };
 
+template <>
+struct from_string<size_t> {
+    size_t operator()(std::string const& s) const {
+        return std::stoul(s);
+    }
+};
 template <typename T>
 struct to_string_s {
     template <typename U>

@@ -18,9 +18,9 @@ static std::string help_function(dp::command_dispatcher const& dispatcher) {
 }
 
 void make_command_dispatcher(shared_music_store& music_store, player_shared_state& player_state, dp::command_dispatcher& dispatcher) {
-    auto add_track_fn = dp::command<std::string(std::string const&)>([&](std::string const& track_id) {
+    auto add_track_fn = dp::command<std::string(size_t, std::string const&)>([&](size_t track_id, std::string const& track_file) {
         auto [store_rw, lock] = music_store.get_payload();
-        dp::add_track(store_rw.get(), track_id, read_track_metadata(track_id));
+        dp::add_track(store_rw.get(), track_id, read_track_metadata(track_file));
         return std::string("add_track ran successfully");
     });
 
@@ -38,7 +38,7 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
         return std::string("prev_track ran successfully");
     });
 
-    auto rm_track_fn = dp::command<std::string(std::string const&)>([&](std::string const& track_id) {
+    auto rm_track_fn = dp::command<std::string(size_t)>([&](size_t track_id) {
         auto [store_rw, wlock] = music_store.get_payload();
         auto [playerst_rw, rlock] = const_cast<player_shared_state const&>(player_state).get_payload();
         dp::remove_track(store_rw.get(), track_id, playerst_rw.get().repeat_mode_);
@@ -46,10 +46,10 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
     });
     auto quit_fn = dp::command<void()>([]() { std::terminate(); });
 
-    dispatcher.register_command("add_track", std::move(add_track_fn), "add_track <track_file>: add the given file to the playlist");
+    dispatcher.register_command("add_track", std::move(add_track_fn), "add_track <track_id> <track_file>: add the given file to the playlist");
     dispatcher.register_command("next_track", std::move(next_track_fn), "next_track: Skip to the next track. Stops playback if repeat is disabled and end of playlist is reached.");
     dispatcher.register_command("prev_track", std::move(prev_track_fn), "prev_track: Go to the previous track.");
-    dispatcher.register_command("rm_track", std::move(rm_track_fn), "rm_track <track_file>: remove the given track file from the playlist");
+    dispatcher.register_command("rm_track", std::move(rm_track_fn), "rm_track <track_id>: remove the given track file from the playlist");
     dispatcher.register_command("quit", std::move(quit_fn), "quit: exit the program... Brutally! ;o");
     dispatcher.register_command("help", dp::command<std::string()>([&]() { return help_function(dispatcher); }), "help: print command descriptions");
 }
