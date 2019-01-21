@@ -22,22 +22,41 @@ static cmd::raw_command get_command(shared_command_queue& cmd_queue) {
     }
 }
 
+static std::optional<std::reference_wrapper<dp::command_dispatcher::command_type> > get_command_obj(dp::command_dispatcher& dispatcher, std::string const& cmd_id) {
+    std::optional<std::reference_wrapper<dp::command_dispatcher::command_type> > actor;
+    try {
+        // First, we fetch the appropriate command:
+        auto& cmd_bundle = dispatcher.get(cmd_id);
+        actor = std::ref(cmd_bundle.first);
+    } catch (std::exception& e) {
+    }
+    return actor;
+}
+
 static void run_command(dp::command_dispatcher& dispatcher, shared_message_queue& msg_queue, cmd::raw_command const& cmd) {
     std::string cmd_outcome;
     cmd::MessagePriority msg_type = cmd::MessagePriority::INFO;
-    try {
-        // First, we fetch the appropriate command:
-        cmd_outcome = dispatcher.run(cmd.cmd_, cmd.args_);
-    } catch (std::exception& e) {
-        cmd_outcome = e.what();
+    // First, we fetch the appropriate command:
+    auto actor = get_command_obj(dispatcher, cmd.cmd_);
+    if (!actor) {
+        cmd_outcome = "Unknown command `" + cmd.cmd_ + "`, try `help` to see available commands."; 
         msg_type = cmd::MessagePriority::ERROR;
+    } else {
+        // All good, we can try to run the command
+        try {
+            cmd_outcome = (*actor)(cmd.args_);
+        } catch (std::exception& e) {
+            cmd_outcome = "An errored occurred performing command `" + cmd.cmd_ + "`: " + e.what();
+            msg_type = cmd::MessagePriority::ERROR;
+        }
     }
+    // Once the command is performed, we can push the result to the message
+    // queue.
     if (!cmd_outcome.empty()) {
-        auto [mq_rw, lock] = msg_queue.get_payload();
         cmd::ui_message msg;
         msg.msg_ = std::move(cmd_outcome);
         msg.prio_ = msg_type;
-        mq_rw.get().emplace(std::move(msg));
+        push_shared_queue(msg_queue, std::move(msg));
     }
 }
 

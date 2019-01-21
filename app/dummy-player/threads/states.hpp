@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "utils/forward_macro.hpp"
 #include "thread/shared_state.hpp"
 #include "music_types/playlist.hpp"
 #include "music_types/player_info.hpp"
@@ -16,6 +17,11 @@ using shared_player_update_queue = shared_state<player_info_update_queue>;
 using shared_command_queue = shared_state<cmd::command_queue>;
 using shared_message_queue = shared_state<cmd::message_queue>;
 
+template <typename Queue, typename... Args>
+inline void push_shared_queue(shared_state<Queue>& msg_queue, Args&&... args) {
+    auto [q_refwrap, wlock] = msg_queue.get_payload();
+    q_refwrap.get().emplace(CPPFWD(args)...);
+}
 
 
 
