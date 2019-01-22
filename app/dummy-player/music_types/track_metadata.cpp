@@ -57,11 +57,12 @@ track_metadata  read_track_metadata(std::string const& path) {
 std::string to_string(track_metadata const& md) {
     using std::to_string;
     std::stringstream sstr;
-    sstr << "artist: " << md.artist_ << "\n"
-         << "title: " << md.title_ << "\n"
-         << "duration: " << to_string(md.duration_.count()) << "\n";
+    sstr << "artist: " << md.artist_ << ", "
+         << "title: " << md.title_ << ", "
+         << "duration: " << to_string(md.duration_.count()) << ", ";
     for (auto const& at : md.attr_) {
-        sstr << at.first << ": " << at.second << "\n";
+        sstr << at.first << ": " << at.second << ", ";
     }
+    sstr << "\n";
     return sstr.str();
 }

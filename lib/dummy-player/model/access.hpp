@@ -43,8 +43,8 @@ class access {
     template <typename MusicCache, typename OStream>
     friend void info_playlist(MusicCache&, OStream&);
 
-    template <typename MusicCache, typename TrackKey>
-    friend std::string info_track(MusicCache&, TrackKey&);
+    template <typename MusicCache, typename TrackKey, typename OStream>
+    friend void info_track(MusicCache&, TrackKey const&, OStream&);
 
     template <typename MusicCache>
     static decltype(auto) get_playlist(MusicCache&& music_cache) {

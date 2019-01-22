@@ -11,6 +11,7 @@
 #include "model/track_navigation.hpp"
 #include "model/set_track.hpp"
 #include "model/unique.hpp"
+#include "model/info.hpp"
 
 static std::string help_function(dp::command_dispatcher const& dispatcher) {
     std::stringstream sstr;
@@ -107,19 +108,53 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
         }
     });
 
-    auto info_playlist_fn = dp::command<std::string()>([&]() -> std::string { return {}; });
+    auto info_playlist_fn = dp::command<std::string()>([&]() -> std::string {
+        std::stringstream sstr;
+        auto [mcache, wlock] = music_store.get_payload();
+        dp::info_playlist(mcache.get(), sstr);
+        return sstr.str();
+    });
+
+    auto info_track_fn = dp::command<std::string(size_t)>([&](size_t track_id) -> std::string {
+        std::stringstream sstr;
+        auto [mcache, wlock] = music_store.get_payload();
+        dp::info_track(mcache.get(), track_id, sstr);
+        return sstr.str();
+    });
+
+    auto info_cur_track_fn = dp::command<std::string()>([&]() -> std::string {
+        std::stringstream sstr;
+        auto [mcache, wlock] = music_store.get_payload();
+        auto cur_track = mcache.get().get_current_track();
+        if (cur_track) {
+            dp::info_track(mcache.get(), cur_track->get().first, sstr);
+        } else {
+            sstr << "No current track set.\n";
+        }
+        return sstr.str();
+    });
 
     auto quit_fn = dp::command<void()>([]() { std::exit(0); });
 
+    // Playlist management commands:
     dispatcher.register_command("add_track", std::move(add_track_fn), "add_track <track_id> <track_file>: add the given file to the playlist");
-    dispatcher.register_command("next_track", std::move(next_track_fn), "next_track: Skip to the next track. Stops playback if repeat is disabled and end of playlist is reached.");
-    dispatcher.register_command("prev_track", std::move(prev_track_fn), "prev_track: Go to the previous track.");
     dispatcher.register_command("set_track", std::move(set_track_fn), "set_track <track_id>: set the current track to the given track.");
     dispatcher.register_command("rm_track", std::move(rm_track_fn), "rm_track <track_id>: remove the given track file from the playlist");
     dispatcher.register_command("unique", std::move(unique_fn), "unique: remove all duplicate tracks from the playlist");
+
+    // Informational commands:
+    dispatcher.register_command("info_track", std::move(info_track_fn), "info_track <track_id>: display information about the desired track");
+    dispatcher.register_command("info_current_track", std::move(info_cur_track_fn), "info_current_track: display information about the current track");
+    dispatcher.register_command("info_playlist", std::move(info_playlist_fn), "info_playlist: display the content of the playlist");
+
+    // Player driving commands:
+    dispatcher.register_command("next_track", std::move(next_track_fn), "next_track: Skip to the next track. Stops playback if repeat is disabled and end of playlist is reached.");
+    dispatcher.register_command("prev_track", std::move(prev_track_fn), "prev_track: Go to the previous track.");
     dispatcher.register_command("repeat_mode", std::move(repeat_mode_fn), "repeat_mode <NONE|ONE|ALL>: set the repeat mode to the given setting");
     dispatcher.register_command("play", std::move(play_fn), "play: start playing (if there is a track to read)");
     dispatcher.register_command("pause", std::move(pause_fn), "pause: pauses the playback thread");
+
+    // Generic commands:
     dispatcher.register_command("quit", std::move(quit_fn), "quit: exit the program... Brutally! ;o");
     dispatcher.register_command("help", dp::command<std::string()>([&]() { return help_function(dispatcher); }), "help: print command descriptions");
 }
