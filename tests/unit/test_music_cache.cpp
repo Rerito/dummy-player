@@ -51,7 +51,8 @@ TEST_F(MusicCacheTest, NextTrack) {
 
 TEST_F(MusicCacheTest, RemoveTrack) {
     dp::set_track(mcache_, 0);
-    auto new_tr = dp::remove_track(mcache_, 0, dp::RepeatMode::REPEAT_ALL);
+    dp::remove_track(mcache_, 0, dp::RepeatMode::REPEAT_ALL);
+    auto new_tr = mcache_.get_current_track();
     ASSERT_EQ(new_tr->get().second, "Holy wars... The punishment due") << "Expected track to be set to track 1 (Holy wars... the punishment due).";
     ASSERT_THROW(dp::set_track(mcache_, 0), std::runtime_error);
 }

@@ -9,6 +9,7 @@
 #include "model/add_track.hpp"
 #include "model/remove_track.hpp"
 #include "model/track_navigation.hpp"
+#include "model/unique.hpp"
 
 static std::string help_function(dp::command_dispatcher const& dispatcher) {
     std::stringstream sstr;
@@ -61,12 +62,25 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
         plr.get().status_ = player_status::PLAYING;
     });
 
+    auto unique_fn = dp::command<void()>([&]() {
+        auto rmode = dp::RepeatMode::NO_REPEAT;
+        {
+            auto [plr, rlock] = const_cast<player_shared_state const&>(player_state).get_payload();
+            rmode = plr.get().repeat_mode_;
+        }
+        {
+            auto [mcache, wlock] = music_store.get_payload();
+            dp::unique(mcache.get(), rmode, track_metadata_less {}, track_metadata_equal_to {});
+        }
+    });
+
     auto quit_fn = dp::command<void()>([]() { std::terminate(); });
 
     dispatcher.register_command("add_track", std::move(add_track_fn), "add_track <track_id> <track_file>: add the given file to the playlist");
     dispatcher.register_command("next_track", std::move(next_track_fn), "next_track: Skip to the next track. Stops playback if repeat is disabled and end of playlist is reached.");
     dispatcher.register_command("prev_track", std::move(prev_track_fn), "prev_track: Go to the previous track.");
     dispatcher.register_command("rm_track", std::move(rm_track_fn), "rm_track <track_id>: remove the given track file from the playlist");
+    dispatcher.register_command("unique", std::move(unique_fn), "unique: remove all duplicate tracks from the playlist");
     dispatcher.register_command("repeat_mode", std::move(repeat_mode_fn), "repeat_mode <NONE|ONE|ALL>: set the repeat mode to the given setting");
     dispatcher.register_command("play", std::move(play_fn), "play: start playing (if there is a track to read)");
     dispatcher.register_command("pause", std::move(pause_fn), "pause: pauses the playback thread");

@@ -49,7 +49,10 @@ struct track_navigation_fns<RepeatMode::REPEAT_ALL> {
     template <typename It>
     static It get_prev_track(It cur, It first, It eot) {
         if (cur == first) {
-            return --eot;
+            if (eot != first) {
+                --eot;
+            }
+            return eot;
         } else {
             return --cur;
         }
@@ -120,12 +123,12 @@ template <typename MusicCache>
 std::optional<typename MusicCache::playlist_type::value_type> next_track(RepeatMode mode, MusicCache& mcache) {
     auto& pl = access::get_playlist(mcache);
     auto cur_track_it = access::get_current_track(mcache);
-    auto nxt_it = get_next_track(mode, cur_track_it, begin(pl), end(pl));
+    auto nxt_it = get_next_track(mode, cur_track_it, decltype(size(pl))(0u), size(pl));
     access::set_current_track(mcache, nxt_it);
-    if (nxt_it == end(pl)) {
+    if (nxt_it == size(pl)) {
         return {};
     } else {
-        return *nxt_it;
+        return pl[nxt_it];
     }
 }
 
@@ -133,12 +136,12 @@ template <typename MusicCache>
 std::optional<typename MusicCache::playlist_type::value_type> previous_track(RepeatMode mode, MusicCache& mcache) {
     auto& pl = access::get_playlist(mcache);
     auto cur_track_it = access::get_current_track(mcache);
-    auto prev_it = get_prev_track(mode, cur_track_it, begin(pl), end(pl));
+    auto prev_it = get_prev_track(mode, cur_track_it, decltype(size(pl))(0u) , size(pl));
     access::set_current_track(mcache, prev_it);
-    if (prev_it == end(pl)) {
+    if (prev_it == size(pl)) {
         return {};
     } else {
-        return *prev_it;
+        return pl[prev_it]; 
     }
 }
 } // namespace dp

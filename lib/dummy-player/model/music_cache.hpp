@@ -32,7 +32,9 @@ public:
 private:
     playlist_type playlist_;
 
-    playlist_iterator current_track_it_;
+    size_t current_track_idx_;
+    // This is still needed not to lose the current track when a shuffle occurs
+    // It is cheap though since playlist_item is a reference_wrapper
     std::optional<playlist_item> current_track_;
 
     // When a playlist reordering occurs, we must update the playlist iterator
@@ -41,14 +43,14 @@ private:
     // playlist.
     void refresh_current_track() {
         if (current_track_) {
-            current_track_it_ = std::find_if(begin(playlist_), end(playlist_), [&](auto const& tr) { return (current_track_->get().first) == (tr.get().first); });
+            current_track_idx_ = std::find_if(begin(playlist_), end(playlist_), [&](auto const& tr) { return (current_track_->get().first) == (tr.get().first); }) - begin(playlist_);
         } else {
-            current_track_it_ = end(playlist_);
+            current_track_idx_ = size(playlist_);
         }
     }
 
 public:
-    music_cache() : playlist_(), current_track_it_(end(playlist_)), current_track_() {}
+    music_cache() : playlist_(), current_track_idx_(0u), current_track_() {}
     // We will try to have a very minimalistic approach with regard to the
     // features we embed into the music_cache...
     // This will allow for better encapsulation and modularity
