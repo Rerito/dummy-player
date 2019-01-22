@@ -34,3 +34,5 @@ And let the console guide you (try typing help or any gibberish)
 The "supported" music files are simply made out of `key=value` lines.
 Take a look at [an example track](data/megadeth/01_HolyWars.music) to get a
 better idea.
+
+Durations are expressed in seconds.
