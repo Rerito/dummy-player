@@ -3,9 +3,10 @@
 
 #include <vector>
 #include "datastruct/cache.hpp"
-#include "utils/make_ref_wrapper_vector.hpp"
 
 #include <optional>
+#include <algorithm>
+#include <functional>
 
 namespace dp {
 
@@ -58,10 +59,20 @@ public:
         using std::begin;
         using std::end;
         ShufflePolicy::shuffle(begin(playlist_), end(playlist_));
+        refresh_current_track();
     }
 
     void reorder(native_order_tag) {
-        playlist_ = make_ref_wrapper_vector(base_type::elems_); 
+        playlist_.clear(); 
+        std::transform(
+            begin(base_type::elems_),
+            end(base_type::elems_),
+            std::back_inserter(playlist_),
+            [](auto& list_it) {
+                return std::ref(list_it);
+            }
+        );
+        refresh_current_track();
     }
 
     std::optional<const_playlist_item> get_current_track() const {

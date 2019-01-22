@@ -23,8 +23,8 @@ public:
     playlist_shuffler(Args&&... args) : g_(CPPFWD(args)...) {}
 
     template <typename RandomIt>
-    void shuffle(RandomIt b, RandomIt e) const {
-        std::random_shuffle(b, e, g_);
+    void shuffle(RandomIt b, RandomIt e) {
+        std::shuffle(b, e, g_);
     }
 };
 

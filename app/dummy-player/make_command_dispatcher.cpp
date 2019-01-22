@@ -12,6 +12,7 @@
 #include "model/set_track.hpp"
 #include "model/unique.hpp"
 #include "model/info.hpp"
+#include "model/shuffle_mode.hpp"
 
 static std::string help_function(dp::command_dispatcher const& dispatcher) {
     std::stringstream sstr;
@@ -134,6 +135,19 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
         return sstr.str();
     });
 
+    auto shuffle_fn = dp::command<void(dp::ShuffleMode)>([&](dp::ShuffleMode mode) {
+        auto [mcache, wlock] = music_store.get_payload();
+        if (dp::ShuffleMode::RANDOM == mode) {
+            mcache.get().reorder(dp::random_shuffle_tag{});
+        } else {
+            mcache.get().reorder(dp::native_order_tag{});
+        }
+        {
+            auto [plrw, plr_wlock] = player_state.get_payload();
+            update_player_track(mcache.get(), plrw.get());
+        }
+    });
+
     auto quit_fn = dp::command<void()>([]() { std::exit(0); });
 
     // Playlist management commands:
@@ -141,6 +155,7 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
     dispatcher.register_command("set_track", std::move(set_track_fn), "set_track <track_id>: set the current track to the given track.");
     dispatcher.register_command("rm_track", std::move(rm_track_fn), "rm_track <track_id>: remove the given track file from the playlist");
     dispatcher.register_command("unique", std::move(unique_fn), "unique: remove all duplicate tracks from the playlist");
+    dispatcher.register_command("shuffle", std::move(shuffle_fn), "shuffle <RANDOM|NATIVE>: shuffle the playlist randomly or restore its original order.");
 
     // Informational commands:
     dispatcher.register_command("info_track", std::move(info_track_fn), "info_track <track_id>: display information about the desired track");
