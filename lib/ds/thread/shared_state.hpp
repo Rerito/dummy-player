@@ -73,3 +73,21 @@ private:
     payload_type payload_;
     mutable mutex_type mutex_;
 };
+
+// Make a copy of the shared state
+template <typename T>
+T get_shared_state(shared_state<T> const& state) {
+    return state.get_payload().first.get();
+}
+
+template <typename T, typename F>
+auto apply_to_shared_state(shared_state<T>& state, F&& ftor) {
+    auto [pl, wlock] = state.get_payload();
+    return CPPFWD(ftor)(pl.get());
+}
+
+template <typename T, typename F>
+auto apply_to_shared_state(shared_state<T> const& state, F&& ftor) {
+    auto [pl, rlock] = state.get_payload();
+    return CPPFWD(ftor)(pl.get());
+}

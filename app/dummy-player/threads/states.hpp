@@ -9,10 +9,11 @@
 #include "music_types/player_info.hpp"
 #include "commands/types.hpp"
 
-using ui_shared_state = shared_state<std::string>;
 using shared_music_store = shared_state<music_store>;
 using player_shared_state = shared_state<player_info>;
 using shared_player_update_queue = shared_state<player_info_update_queue>;
+
+using shared_playback_status = shared_state<playback_status>;
 
 using shared_command_queue = shared_state<cmd::command_queue>;
 using shared_message_queue = shared_state<cmd::message_queue>;

@@ -74,7 +74,9 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
         }
     });
 
-    auto quit_fn = dp::command<void()>([]() { std::terminate(); });
+    auto info_playlist_fn = dp::command<std::string()>([&]() -> std::string { return {}; });
+
+    auto quit_fn = dp::command<void()>([]() { std::exit(0); });
 
     dispatcher.register_command("add_track", std::move(add_track_fn), "add_track <track_id> <track_file>: add the given file to the playlist");
     dispatcher.register_command("next_track", std::move(next_track_fn), "next_track: Skip to the next track. Stops playback if repeat is disabled and end of playlist is reached.");
