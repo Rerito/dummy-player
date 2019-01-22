@@ -36,4 +36,6 @@ inline std::optional<typename Queue::value_type> pop_shared_queue(shared_state<Q
     return item;
 }
 
+void update_player_track(music_store const& ms, player_info& plr_state, bool bypass_comp=false);
+
 

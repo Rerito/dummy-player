@@ -10,10 +10,12 @@
 #include "player_status.hpp"
 #include "track_metadata.hpp"
 
+using track_bundle_t = std::pair<size_t, track_metadata>;
+
 struct player_info {
     player_status status_;
     dp::RepeatMode repeat_mode_;
-    track_metadata track_;
+    std::optional<track_bundle_t> track_;
     bool update_track_;
 };
 

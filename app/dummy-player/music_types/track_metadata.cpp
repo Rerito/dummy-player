@@ -45,7 +45,7 @@ static std::unordered_map<std::string, std::string> parse_kv_file(std::string co
 track_metadata  read_track_metadata(std::string const& path) {
     auto kv_map = parse_kv_file(path);
 
-    track_metadata md { kv_map["artist"], kv_map["title"], parse_duration(kv_map["duration"])  };
+    track_metadata md { kv_map["title"], kv_map["artist"], parse_duration(kv_map["duration"])  };
     kv_map.erase("artist");
     kv_map.erase("title");
     kv_map.erase("duration");

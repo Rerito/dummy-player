@@ -9,6 +9,7 @@
 #include "model/add_track.hpp"
 #include "model/remove_track.hpp"
 #include "model/track_navigation.hpp"
+#include "model/set_track.hpp"
 #include "model/unique.hpp"
 
 static std::string help_function(dp::command_dispatcher const& dispatcher) {
@@ -27,22 +28,40 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
 
     auto next_track_fn = dp::command<std::string()>([&]() {
         auto [store_rw, lock] = music_store.get_payload();
-        auto [playerst_rw, rlock] = const_cast<player_shared_state const&>(player_state).get_payload();
-        dp::next_track(playerst_rw.get().repeat_mode_, store_rw.get());
+        {
+            auto [playerst_rw, rlock] = const_cast<player_shared_state const&>(player_state).get_payload();
+            dp::next_track(playerst_rw.get().repeat_mode_, store_rw.get());
+        }
+        {
+            auto [pst, pst_wlock] = player_state.get_payload();
+            update_player_track(store_rw.get(), pst.get(), true);
+        }
         return std::string("next_track ran successfully");
     });
 
     auto prev_track_fn = dp::command<std::string()>([&]() {
         auto [store_rw, lock] = music_store.get_payload();
-        auto [playerst_rw, rlock] = const_cast<player_shared_state const&>(player_state).get_payload();
-        dp::previous_track(playerst_rw.get().repeat_mode_, store_rw.get());
+        {
+            auto [playerst_rw, rlock] = const_cast<player_shared_state const&>(player_state).get_payload();
+            dp::previous_track(playerst_rw.get().repeat_mode_, store_rw.get());
+        }
+        {
+            auto [pst, pst_wlock] = player_state.get_payload();
+            update_player_track(store_rw.get(), pst.get(), true);
+        }
         return std::string("prev_track ran successfully");
     });
 
     auto rm_track_fn = dp::command<std::string(size_t)>([&](size_t track_id) {
         auto [store_rw, wlock] = music_store.get_payload();
-        auto [playerst_rw, rlock] = const_cast<player_shared_state const&>(player_state).get_payload();
-        dp::remove_track(store_rw.get(), track_id, playerst_rw.get().repeat_mode_);
+        {
+            auto [playerst_rw, rlock] = const_cast<player_shared_state const&>(player_state).get_payload();
+            dp::remove_track(store_rw.get(), track_id, playerst_rw.get().repeat_mode_);
+        }
+        {
+            auto [pst, pst_wlock] = player_state.get_payload();
+            update_player_track(store_rw.get(), pst.get());
+        }
         return "rm_track ran successfully";
     });
 
@@ -50,6 +69,16 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
         auto [playerst_rw, wlock] = player_state.get_payload();
         playerst_rw.get().repeat_mode_ = mode;
         return "repeat_mode ran successfully";
+    });
+
+    auto set_track_fn = dp::command<std::string(size_t)>([&](size_t track_id) {
+        auto [store_rw, wlock] = music_store.get_payload();
+        dp::set_track(store_rw.get(), track_id);
+        {
+            auto [pst, pst_wlock] = player_state.get_payload();
+            update_player_track(store_rw.get(), pst.get(), true);
+        }
+        return "set_track ran successfully";
     });
 
     auto play_fn = dp::command<void()>([&]() {
@@ -71,6 +100,10 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
         {
             auto [mcache, wlock] = music_store.get_payload();
             dp::unique(mcache.get(), rmode, track_metadata_less {}, track_metadata_equal_to {});
+            {
+                auto [plr, plr_wlock] = player_state.get_payload();
+                update_player_track(mcache.get(), plr.get());
+            }
         }
     });
 
@@ -81,6 +114,7 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
     dispatcher.register_command("add_track", std::move(add_track_fn), "add_track <track_id> <track_file>: add the given file to the playlist");
     dispatcher.register_command("next_track", std::move(next_track_fn), "next_track: Skip to the next track. Stops playback if repeat is disabled and end of playlist is reached.");
     dispatcher.register_command("prev_track", std::move(prev_track_fn), "prev_track: Go to the previous track.");
+    dispatcher.register_command("set_track", std::move(set_track_fn), "set_track <track_id>: set the current track to the given track.");
     dispatcher.register_command("rm_track", std::move(rm_track_fn), "rm_track <track_id>: remove the given track file from the playlist");
     dispatcher.register_command("unique", std::move(unique_fn), "unique: remove all duplicate tracks from the playlist");
     dispatcher.register_command("repeat_mode", std::move(repeat_mode_fn), "repeat_mode <NONE|ONE|ALL>: set the repeat mode to the given setting");

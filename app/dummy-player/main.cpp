@@ -12,8 +12,18 @@ int main() {
     shared_message_queue msg_queue;
     shared_command_queue cmd_queue;
     player_shared_state player_state;
+    shared_playback_status playback_status;
     shared_music_store mstore;
     shared_state<std::exception_ptr> status_eptr;
+
+    std::thread streamr_thread([&]() {
+        streamer_main(
+            msg_queue,
+            cmd_queue,
+            player_state,
+            playback_status
+        );
+    });
 
     std::thread ui_thread([&]() {
         user_input_main(cmd_queue);

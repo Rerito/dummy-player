@@ -30,6 +30,7 @@ static std::vector<std::string> split_string(std::string str, std::string const&
 
 static std::string get_command() {
     std::string cmd;
+    std::cout << "> ";
     std::getline(std::cin, cmd);
     return cmd;
 }
@@ -64,7 +65,6 @@ static void commit_command(shared_command_queue& cmd_queue,
 void user_input_main(shared_command_queue& cmd_queue) {
     using namespace std::chrono_literals;
     // We will take care of termination handling later
-    std:: cout << "> ";
     while (true) {
         auto cmd = get_command();
         commit_command(cmd_queue, cmd);
