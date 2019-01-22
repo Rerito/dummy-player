@@ -90,7 +90,7 @@ void make_command_dispatcher(shared_music_store& music_store, player_shared_stat
 
     auto pause_fn = dp::command<void()>([&]() {
         auto [plr, wlock] = player_state.get_payload();
-        plr.get().status_ = player_status::PLAYING;
+        plr.get().status_ = player_status::PAUSED;
     });
 
     auto unique_fn = dp::command<void()>([&]() {
