@@ -19,7 +19,7 @@ void unique(MusicCache& mcache, RepeatMode mode, TrackLess&& less, TrackEqual&& 
     };
     auto rmode = (mode == RepeatMode::REPEAT_1) ? RepeatMode::NO_REPEAT : mode;
     // Begin by establishing the set of tracks to remove
-    auto pl_copy = dp::access::get_playlist(mcache);
+    auto pl_copy = access::get_playlist(mcache);
     // We sort the playlist using the specified track < and == operators
     // So that in the end "equal" tracks are sorted by increasing track id
     // This way, for any duplicates, we will only keep the track with the lowest
