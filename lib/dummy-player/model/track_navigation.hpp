@@ -36,7 +36,10 @@ template <>
 struct track_navigation_fns<RepeatMode::REPEAT_ALL> {
     template <typename It>
     static It get_next_track(It cur, It first, It eot) {
-        if (++cur == eot) {
+        if (cur != eot) {
+            ++cur;
+        }
+        if (cur == eot) {
             return first;
         } else {
             return cur;

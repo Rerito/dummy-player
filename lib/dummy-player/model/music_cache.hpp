@@ -24,16 +24,16 @@ class music_cache : private cache<TrackKey, Track, Hash, Eq>, private ShufflePol
 
 public:
     using base_type = cache<TrackKey, Track, Hash, Eq>;
-    using playlist_type = std::vector<std::reference_wrapper<Track> >;
+    using item = typename base_type::list_t::value_type;
+    using playlist_item = std::reference_wrapper<item>; 
+    using const_playlist_item = std::reference_wrapper<item const>;
+    using playlist_type = std::vector<playlist_item>;
     using playlist_iterator = typename playlist_type::iterator;
-    using track_type = Track;
-    using track_id = TrackKey;
 private:
     playlist_type playlist_;
-    std::unordered_map<Track*, TrackKey> playlist_idx_;
 
     playlist_iterator current_track_it_;
-    std::optional<std::reference_wrapper<Track> > current_track_;
+    std::optional<playlist_item> current_track_;
 
     // When a playlist reordering occurs, we must update the playlist iterator
     // so that it points to the correct track...
@@ -41,7 +41,7 @@ private:
     // playlist.
     void refresh_current_track() {
         if (current_track_) {
-            current_track_it_ = std::find_if(begin(playlist_), end(playlist_), [&](auto const& tr) { return &(current_track_->get()) == &(tr.get()); });
+            current_track_it_ = std::find_if(begin(playlist_), end(playlist_), [&](auto const& tr) { return (current_track_->get().first) == (tr.get().first); });
         } else {
             current_track_it_ = end(playlist_);
         }
@@ -62,7 +62,7 @@ public:
         playlist_ = make_ref_wrapper_vector(base_type::elems_); 
     }
 
-    std::optional<std::reference_wrapper<Track const> > get_current_track() const {
+    std::optional<const_playlist_item> get_current_track() const {
         if (current_track_) {
             return std::cref(current_track_->get());
         } else {

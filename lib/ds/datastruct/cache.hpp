@@ -22,7 +22,7 @@ template <typename Key, typename Value, typename Hash, typename Eq, typename Pru
 class basic_cache : PruningPolicy {
     friend PruningPolicy;
 public:
-    using list_t = std::list<std::pair<Key,Value> >;
+    using list_t = std::list<std::pair<Key const,Value> >;
     using list_iterator = typename list_t::iterator;
     using map_t = std::unordered_map<Key, list_iterator, Hash, Eq>;
     using map_value_t = typename map_t::value_type;
@@ -40,7 +40,7 @@ public:
         if (it != list_iterator {}) {
             throw std::invalid_argument("invalid argument: k");
         }
-        elems_.emplace_back(std::pair<Key, Value>(k, Value(CPPFWD(args)...)));
+        elems_.emplace_back(std::pair<Key const, Value>(k, Value(CPPFWD(args)...)));
         it = --end(elems_);
         PruningPolicy::prune(*this);
         return it->second;

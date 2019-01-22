@@ -28,7 +28,7 @@ TEST_F(MusicCacheTest, SetTrack) {
     dp::set_track(mcache_, 0);
     auto cur_track = mcache_.get_current_track();
     ASSERT_TRUE(cur_track) << "Expected current track to be set";
-    ASSERT_EQ(cur_track->get(), std::string("Hold the line"));
+    ASSERT_EQ(cur_track->get().second, std::string("Hold the line"));
 }
 
 TEST_F(MusicCacheTest, EmptyNextTrack) {
@@ -43,12 +43,12 @@ TEST_F(MusicCacheTest, NextTrack) {
     dp::next_track(dp::RepeatMode::NO_REPEAT, mcache_);
     auto cur_track = mcache_.get_current_track();
     ASSERT_TRUE(cur_track);
-    ASSERT_EQ(cur_track->get(), std::string("Act like you know"));
+    ASSERT_EQ(cur_track->get().second, std::string("Act like you know"));
 }
 
 TEST_F(MusicCacheTest, RemoveTrack) {
     dp::set_track(mcache_, 0);
     auto new_tr = dp::remove_track(mcache_, 0, dp::RepeatMode::REPEAT_ALL);
-    ASSERT_EQ(new_tr->get(), "Holy wars... The punishment due") << "Expected track to be set to track 1 (Holy wars... the punishment due).";
+    ASSERT_EQ(new_tr->get().second, "Holy wars... The punishment due") << "Expected track to be set to track 1 (Holy wars... the punishment due).";
     ASSERT_THROW(dp::set_track(mcache_, 0), std::runtime_error);
 }
