@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "access.hpp"
+#include "set_track.hpp"
 #include "track_navigation.hpp"
 
 namespace dp {
@@ -30,7 +31,11 @@ std::optional<typename MusicCache::playlist_type::value_type> remove_track(Music
             [&](auto const& rw) { return (rw.get().first) == track_id; }
         )
     );
-
+    if (track) {
+        set_track(mcache, track->get().first);
+    } else {
+        set_track(mcache);
+    }
     // Then by removing it from the raw storage cache:
     dp::access::get_base_cache(mcache).erase(track_id);
     return track;

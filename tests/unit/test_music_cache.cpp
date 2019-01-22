@@ -7,6 +7,7 @@
 #include "model/track_navigation.hpp"
 #include "model/remove_track.hpp"
 #include "model/playlist_shuffle.hpp"
+#include "model/unique.hpp"
 
 using music_cache_t = dp::music_cache<int, std::string, dp::playlist_shuffler<> >;
 
@@ -17,6 +18,8 @@ struct MusicCacheTest : testing::Test {
         dp::add_track(mcache_, 0, "Hold the line");
         dp::add_track(mcache_, 1, "Holy wars... The punishment due");
         dp::add_track(mcache_, 2, "Act like you know");
+        dp::add_track(mcache_, 3, "Holy wars... The punishment due");
+        dp::add_track(mcache_, 4, "Act like you know");
     }
 
     virtual void TearDown() override {
@@ -51,4 +54,10 @@ TEST_F(MusicCacheTest, RemoveTrack) {
     auto new_tr = dp::remove_track(mcache_, 0, dp::RepeatMode::REPEAT_ALL);
     ASSERT_EQ(new_tr->get().second, "Holy wars... The punishment due") << "Expected track to be set to track 1 (Holy wars... the punishment due).";
     ASSERT_THROW(dp::set_track(mcache_, 0), std::runtime_error);
+}
+
+TEST_F(MusicCacheTest, Unique) {
+    dp::unique(mcache_, dp::RepeatMode::NO_REPEAT, std::less<std::string>{}, std::equal_to<std::string>{});
+    ASSERT_THROW(dp::set_track(mcache_, 3), std::runtime_error);
+    ASSERT_THROW(dp::set_track(mcache_, 4), std::runtime_error);
 }

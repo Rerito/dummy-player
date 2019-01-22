@@ -23,6 +23,9 @@ class access {
     template <typename MusicCache, typename TrackKey>
     friend void set_track(MusicCache&, TrackKey const&);
 
+    template <typename MusicCache>
+    friend void set_track(MusicCache&);
+
     // Playlist management services:
     template <typename MusicCache>
     friend void shuffle_playlist(MusicCache&);
@@ -33,8 +36,8 @@ class access {
     template <typename MusicCache, typename TrackKey>
     friend std::optional<typename MusicCache::playlist_type::value_type> remove_track(MusicCache& music_cache, TrackKey const&, RepeatMode);
 
-    template <typename MusicCache>
-    friend void unique(MusicCache&);
+    template <typename MusicCache, typename TrackLess, typename TrackEqual>
+    friend void unique(MusicCache&, RepeatMode, TrackLess&&, TrackEqual&&);
 
     // Informational services:
     template <typename MusicCache, typename OStream>

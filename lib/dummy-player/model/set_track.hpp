@@ -18,4 +18,10 @@ void set_track(MusicCache& mcache, TrackKey const& track_id) {
     access::set_current_track(mcache, new_track_it);
 }
 
+template <typename MusicCache>
+void set_track(MusicCache& mcache) {
+    auto& pl = access::get_playlist(mcache);
+    access::set_current_track(mcache, end(pl));
+}
+
 } // namespace dp
